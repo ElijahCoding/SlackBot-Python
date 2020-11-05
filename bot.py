@@ -20,10 +20,20 @@ slack_event_adapter = SlackEventAdapter(
 )
 
 client = slack_sdk.WebClient(token=os.environ['SLACK_TOKEN'])
+BOT_ID = client.api_call('auth.test')['user_id']
 
 # client.chat_postMessage(channel='#test', text='hello')
 
 @slack_event_adapter.on('message')
+def message(payload):
+    event = payload.get('event', {})
+    channel_id = event.get('channel')
+    user_id = event.get('user')
+    text = event.get('text')
+
+    if BOT_ID != user_id:
+        client.chat_postMessage(channel='#test', text=text)
+
 
 
 if __name__ == "__main__":
